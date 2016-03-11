@@ -1,0 +1,32 @@
+{
+  "options": {
+    "directed": true,
+    "multigraph": true,
+    "compound": true
+  },
+  "nodes": [
+    {
+      "v": "l",
+      "value": {
+        "meta": "lambda",
+        "data": {}
+      }
+    },
+    {
+      "v": "a",
+      "value": {
+        "meta": "apply"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "v": "l",
+      "w": "a",
+      "value": {
+        "outPort": "lambda",
+        "inPort": "lambda"
+      }
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "name": "@buggyorg/functional",
+  "version": "0.1.0",
+  "description": "Transformation of functional concepts.",
+  "main": "lib/api.js",
+  "bin": {
+    "buggy-functional": "./lib/cli.js"
+  },
+  "scripts": {
+    "test": "node node_modules/standard/bin/cmd.js src/**/*.js && babel src -d lib && node_modules/mocha/bin/mocha --compilers js:babel-register",
+    "build": "babel src -d lib",
+    "prepublish": "babel src -d lib"
+  },
+  "contributors": [
+    {
+      "name": "Maximilian Klein",
+      "email": "dasmaxl@gmail.com"
+    }
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@buggyorg/graphtools": "^0.1.0",
+    "lodash": "^4.0.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.4.5",
+    "babel-polyfill": "^6.3.14",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-register": "^6.4.3",
+    "chai": "^3.4.1",
+    "mocha": "^2.3.3",
+    "standard": "^5.3.1"
+  }
+}
