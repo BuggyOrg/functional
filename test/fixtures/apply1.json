@@ -9,13 +9,22 @@
       "v": "l",
       "value": {
         "meta": "lambda",
-        "data": {}
+        "data": {},
+        "inputPorts": {},
+        "outputPorts": {}
       }
     },
     {
       "v": "a",
       "value": {
-        "meta": "apply"
+        "meta": "apply",
+        "inputPorts": {
+          "argument" : "generic",
+          "lambda": "lambda"
+        },
+        "outputPorts": {
+          "result": "array"
+        }
       }
     }
   ],

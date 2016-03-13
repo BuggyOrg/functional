@@ -35,6 +35,6 @@ describe('Lambda functions', () => {
   it('`applyBacktrack` backtracks the lambda function of an application', () => {
     var applyGraph = readFixture('apply1.json')
 
-    expect(lambda.applyBacktrack(applyGraph, 'a')).to.deep.equal({lambda: 'l', path: ['l', 'a']})
+    expect(lambda.applyBacktrack(applyGraph, 'a')).to.deep.equal([{node: 'l', payload: ['l', 'a']}])
   })
 })

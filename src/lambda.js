@@ -16,7 +16,11 @@ export function functionType (node) {
 }
 
 export function applyBacktrack (graph, node) {
-  backtrackPortGraph(graph, node, (node, payload) => {
-    return []
+  return backtrackPortGraph(graph, node, (id, node, payload) => {
+    if (_.invertBy(node.inputPorts)['lambda'] === undefined) {
+      return {payload: _.concat(payload || [], [id])}
+    }
+    return _.invertBy(node.inputPorts)['lambda'].map((port) =>
+      ({port: port, payload: _.concat(payload || [], [id])}))
   })
 }
