@@ -11,7 +11,9 @@
         "meta": "lambda",
         "data": {},
         "inputPorts": {},
-        "outputPorts": {}
+        "outputPorts": {
+          "fn": "lambda"
+        }
       }
     },
     {
@@ -20,7 +22,7 @@
         "meta": "apply",
         "inputPorts": {
           "argument" : "generic",
-          "lambda": "lambda"
+          "fn": "lambda"
         },
         "outputPorts": {
           "result": "array"
@@ -33,8 +35,8 @@
       "v": "l",
       "w": "a",
       "value": {
-        "outPort": "lambda",
-        "inPort": "lambda"
+        "outPort": "fn",
+        "inPort": "fn"
       }
     }
   ]

@@ -32,9 +32,16 @@ describe('Lambda functions', () => {
     expect(lambda.functionType(lambdaNode)).to.deep.equal({from: [{a: 'number'}], to: [{b: 'number'}]})
   })
 
-  it('`applyBacktrack` backtracks the lambda function of an application', () => {
-    var applyGraph = readFixture('apply1.json')
-
-    expect(lambda.applyBacktrack(applyGraph, 'a')).to.deep.equal([{node: 'l', payload: ['l', 'a']}])
+  var applyGraph = readFixture('apply1.json')
+  it('`backtrackLambda` returns the path to a lambda function from a node', () => {
+    var lambdaPath = lambda.backtrackLambda(applyGraph, 'a')
+    expect(lambdaPath).to.have.length(1)
+    expect(lambdaPath[0]).to.have.length(2)
+    expect(lambdaPath[0][0]).to.equal('l')
   })
+/*
+  it('`applyBacktrack` backtracks the lambda function of an application', () => {
+    expect(lambda.backtrackApply(applyGraph, 'a')).to.deep.equal({lambda: 'l', path: ['l', 'a']})
+  })
+*/
 })
