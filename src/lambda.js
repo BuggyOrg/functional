@@ -29,13 +29,17 @@ export function backtrackApply (graph, node) {
 
 export function rewriteApply (graph, node) {
   var paths = backtrackLambda(graph, node)
-  return rewrite(graph, node, {
-    nodes: [
-      inner(graph.node(paths[0][0]))
-    ],
-    edges: _.filter(graph.nodeEdges(node), (edge) => {
-      return edge.w === node ||
-        graph.node(node).inputPorts[edge.inPort] !== 'lamdba'
-    })
+  var innerNode = inner(graph.node(paths[0][0]))
+  var connectors = rewrite.edgeConnectors({
+    value: Object.keys(innerNode.inputPorts)[0],
+    result: Object.keys(innerNode.outputPorts)[0]
+  })
+  var filterEdges = rewrite.filterEdges(graph, node, (edge) => {
+    return edge.w === node ||
+    graph.node(node).inputPorts[edge.inputPort] !== 'lamdba'
+  })
+  return rewrite.apply(graph, node, {
+    nodes: rewrite.node(graph, node, innerNode),
+    edges: _.concat(connectors, filterEdges)
   })
 }
