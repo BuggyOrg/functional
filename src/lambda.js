@@ -30,9 +30,9 @@ export function backtrackApply (graph, node) {
 export function rewriteApply (graph, node) {
   var paths = backtrackLambda(graph, node)
   var innerNode = inner(graph.node(paths[0][0]))
-  var connectors = rewrite.edgeConnectors({
-    value: {node: innerNode.name, port: Object.keys(innerNode.value.inputPorts)[0]},
-    result: {node: innerNode.name, port: Object.keys(innerNode.value.outputPorts)[0]}
+  var connectors = rewrite.edgeConnectors(graph, node, {
+    value: {node: innerNode.v, port: Object.keys(innerNode.value.inputPorts)[0]},
+    result: {node: innerNode.v, port: Object.keys(innerNode.value.outputPorts)[0]}
   })
   return rewrite.apply(graph, node, {
     nodes: [innerNode],

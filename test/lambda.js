@@ -46,7 +46,9 @@ describe('Lambda functions', () => {
   })
 
   it('`rewriteApply` redirects inputs to the lambda function', () => {
-    
+    var rewGraph = lambda.rewriteApply(applyGraph, 'a')
+    console.log(JSON.stringify(graphlib.json.write(rewGraph), null, 2))
+    expect(rewGraph.edges().length).to.equal(applyGraph.edges().length + 2)
   })
 /*
   it('`applyBacktrack` backtracks the lambda function of an application', () => {
