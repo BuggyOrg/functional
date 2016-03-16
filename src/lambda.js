@@ -31,15 +31,11 @@ export function rewriteApply (graph, node) {
   var paths = backtrackLambda(graph, node)
   var innerNode = inner(graph.node(paths[0][0]))
   var connectors = rewrite.edgeConnectors({
-    value: Object.keys(innerNode.inputPorts)[0],
-    result: Object.keys(innerNode.outputPorts)[0]
-  })
-  var filterEdges = rewrite.filterEdges(graph, node, (edge) => {
-    return edge.w === node ||
-    graph.node(node).inputPorts[edge.inputPort] !== 'lamdba'
+    value: {node: innerNode.name, port: Object.keys(innerNode.value.inputPorts)[0]},
+    result: {node: innerNode.name, port: Object.keys(innerNode.value.outputPorts)[0]}
   })
   return rewrite.apply(graph, node, {
-    nodes: rewrite.node(graph, node, innerNode),
-    edges: _.concat(connectors, filterEdges)
+    nodes: [innerNode],
+    edges: connectors
   })
 }

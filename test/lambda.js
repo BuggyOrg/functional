@@ -39,6 +39,11 @@ describe('Lambda functions', () => {
     expect(lambdaPath[0]).to.have.length(2)
     expect(lambdaPath[0][0]).to.equal('l')
   })
+  
+  it('`rewriteApply` places the lambda function in the place of apply', () => {
+    var rewGraph = lambda.rewriteApply(applyGraph, 'a')
+    expect(rewGraph.nodes()).to.include('a:inc')
+  })
 /*
   it('`applyBacktrack` backtracks the lambda function of an application', () => {
     expect(lambda.backtrackApply(applyGraph, 'a')).to.deep.equal({lambda: 'l', path: ['l', 'a']})

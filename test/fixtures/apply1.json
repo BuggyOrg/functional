@@ -9,7 +9,18 @@
       "v": "l",
       "value": {
         "meta": "lambda",
-        "data": {},
+        "data": {
+          "v": "inc",
+          "value": {
+            "meta": "math/inc",
+            "inputPorts": {
+              "i": "number"
+            },
+            "outputPorts": {
+              "inc": "number"
+            }
+          }
+        },
         "inputPorts": {},
         "outputPorts": {
           "fn": "lambda"
@@ -21,7 +32,7 @@
       "value": {
         "meta": "apply",
         "inputPorts": {
-          "argument" : "generic",
+          "value" : "generic",
           "fn": "lambda"
         },
         "outputPorts": {
