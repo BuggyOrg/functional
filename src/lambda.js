@@ -49,6 +49,20 @@ export function partialize (graph, lambdaNode, path) {
     })
 }
 
+export function portmapToEdges (graph, innerNode, portmap) {
+  return _.map(portmap, (pm) => {
+    var pred = walk.predecessor(graph, pm.partial, pm.port)
+    return {
+      v: pred,
+      w: innerNode.v,
+      value: {
+        outPort: pm.port,
+        inPort: '?'
+      }
+    }
+  })
+}
+
 export function rewriteApply (graph, node) {
   var paths = backtrackLambda(graph, node)
   var innerNode = inner(graph.node(paths[0][0]))
@@ -67,6 +81,6 @@ export function rewriteApply (graph, node) {
   })
   return rewrite.apply(graph, node, {
     nodes: [innerNode],
-    edges: connectors
+    edges: _.concat(connectors, portmapToEdges(graph, innerNode, remainingPorts.portmap))
   })
 }

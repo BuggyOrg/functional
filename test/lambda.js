@@ -53,6 +53,11 @@ describe('Lambda functions', () => {
   })
 
   var partialGraph = readFixture('partial.json')
+  it('prints', () => {
+    var rewGraph = lambda.rewriteApply(partialGraph, 'a')
+    console.log(JSON.stringify(graphlib.json.write(rewGraph), null, 2))
+  })
+
   it('`partialize` returns a list of remaining ports', () => {
     var inner = partialGraph.node('l').data
     var remain = lambda.partialize(partialGraph, inner, ['p'])

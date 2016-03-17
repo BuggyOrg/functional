@@ -19,7 +19,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@buggyorg/graphtools": "^0.2.1",
+    "@buggyorg/graphtools": "^0.2.2",
     "lodash": "^4.0.0"
   },
   "devDependencies": {
