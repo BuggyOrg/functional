@@ -1,0 +1,113 @@
+{
+  "options": {
+    "directed": true,
+    "multigraph": true,
+    "compound": true
+  },
+  "nodes": [
+    {
+      "v": "l",
+      "value": {
+        "meta": "lambda",
+        "data": {
+          "v": "add",
+          "value": {
+            "meta": "math/add",
+            "inputPorts": {
+              "s1": "number",
+              "s2": "number"
+            },
+            "outputPorts": {
+              "sum": "number"
+            }
+          }
+        },
+        "inputPorts": {},
+        "outputPorts": {
+          "fn": "lambda"
+        }
+      }
+    },
+    {
+      "v": "p",
+      "value": {
+        "meta": "partial",
+        "port": "s2",
+        "inputPorts": {
+          "fn": "lambda",
+          "value": "generic"
+        },
+        "outputPorts": {
+          "fn_res": "lambda"
+        }
+      }
+    },
+    {
+      "v": "a",
+      "value": {
+        "meta": "apply",
+        "inputPorts": {
+          "value" : "generic",
+          "fn": "lambda"
+        },
+        "outputPorts": {
+          "result": "array"
+        }
+      }
+    },
+    {
+      "v": "c",
+      "value": {
+        "meta": "math/const1",
+        "inputPorts": {},
+        "outputPorts": {
+          "const1/output": "int"
+        }
+      }
+    },
+    {
+      "v": "out",
+      "value": {
+        "meta": "io/stdout",
+        "inputPorts": {
+          "stdout/input": "string"
+        },
+        "outputPorts": {}
+      }
+    }
+  ],
+  "edges": [
+    {
+      "v": "l",
+      "w": "p",
+      "value": {
+        "outPort": "fn",
+        "inPort": "fn"
+      }
+    },
+    {
+      "v": "c",
+      "w": "a",
+      "value": {
+        "outPort": "const1/output",
+        "inPort": "value"
+      }
+    },
+    {
+      "v": "c",
+      "w": "p",
+      "value": {
+        "outPort": "const1/output",
+        "inPort": "value"
+      }
+    },
+    {
+      "v": "p",
+      "w": "a",
+      "values": {
+        "outPort": "fn_res",
+        "inPort": "fn"
+      }
+    }
+  ]
+}

@@ -39,7 +39,7 @@ describe('Lambda functions', () => {
     expect(lambdaPath[0]).to.have.length(2)
     expect(lambdaPath[0][0]).to.equal('l')
   })
-  
+
   it('`rewriteApply` places the lambda function in the place of apply', () => {
     var rewGraph = lambda.rewriteApply(applyGraph, 'a')
     expect(rewGraph.nodes()).to.include('a:inc')
@@ -50,6 +50,18 @@ describe('Lambda functions', () => {
     expect(rewGraph.edges().length).to.equal(applyGraph.edges().length + 2)
     expect(rewGraph.predecessors('a:inc')).to.include('a')
     expect(rewGraph.successors('a:inc')).to.include('a')
+  })
+
+  var partialGraph = readFixture('partial.json')
+  it('`partialize` returns a list of remaining ports', () => {
+    var inner = partialGraph.node('l').data
+    var remain = lambda.partialize(partialGraph, inner, ['p'])
+    console.log(JSON.stringify(remain, null, 2))
+    expect(remain.input).to.have.length(1)
+  })
+
+  it('`partialize` throws an error if the path contains a non partial', () => {
+    expect(() => lambda.partialize(partialGraph, {}, ['a'])).to.throw(Error)
   })
 /*
   it('`applyBacktrack` backtracks the lambda function of an application', () => {
