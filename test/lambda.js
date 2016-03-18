@@ -54,6 +54,7 @@ describe('Lambda functions', () => {
 
   var partialGraph = readFixture('partial.json')
   it('prints', () => {
+    console.log(JSON.stringify(graphlib.json.write(partialGraph), null, 2))
     var rewGraph = lambda.rewriteApply(partialGraph, 'a')
     console.log(JSON.stringify(graphlib.json.write(rewGraph), null, 2))
   })

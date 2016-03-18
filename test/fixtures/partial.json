@@ -104,7 +104,7 @@
     {
       "v": "p",
       "w": "a",
-      "values": {
+      "value": {
         "outPort": "fn_res",
         "inPort": "fn"
       }
