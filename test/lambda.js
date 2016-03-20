@@ -6,6 +6,7 @@ import fs from 'fs'
 import 'babel-register'
 import _ from 'lodash'
 import * as lambda from '../src/lambda'
+import {walk} from '@buggyorg/graphtools'
 
 var expect = chai.expect
 
@@ -53,21 +54,26 @@ describe('Lambda functions', () => {
   })
 
   var partialGraph = readFixture('partial.json')
-  it('prints', () => {
-    console.log(JSON.stringify(graphlib.json.write(partialGraph), null, 2))
+  it('`rewriteApply` redirects the input and output of the applied function correctly', () => {
     var rewGraph = lambda.rewriteApply(partialGraph, 'a')
-    console.log(JSON.stringify(graphlib.json.write(rewGraph), null, 2))
+    expect(walk.predecessor(rewGraph, 'a:add', 's1')).to.deep.equal(['a'])
+    expect(walk.successor(rewGraph, 'a:add', 'sum')).to.deep.equal(['a'])
   })
 
   it('`partialize` returns a list of remaining ports', () => {
     var inner = partialGraph.node('l').data
     var remain = lambda.partialize(partialGraph, inner, ['p'])
-    console.log(JSON.stringify(remain, null, 2))
     expect(remain.input).to.have.length(1)
   })
 
   it('`partialize` throws an error if the path contains a non partial', () => {
     expect(() => lambda.partialize(partialGraph, {}, ['a'])).to.throw(Error)
+  })
+
+  it('`rewriteApply` can redirect partial inputs to applied location', () => {
+    var rewGraph = lambda.rewriteApply(partialGraph, 'a')
+    expect(walk.predecessor(rewGraph, 'a:add', 's2')).to.deep.equal(['c'])
+    expect(rewGraph.edge({v: 'c', w: 'a:add'}).outPort).to.equal('const1/output')
   })
 /*
   it('`applyBacktrack` backtracks the lambda function of an application', () => {
@@ -75,3 +81,4 @@ describe('Lambda functions', () => {
   })
 */
 })
+
