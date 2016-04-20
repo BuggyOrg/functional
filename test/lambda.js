@@ -15,6 +15,7 @@ var readFixture = (file) => {
 }
 
 describe('Lambda functions', () => {
+/*
   it('`inner` reads the enclosed lambda function', () => {
     var lambdaNode = {
       meta: 'lambda',
@@ -75,10 +76,14 @@ describe('Lambda functions', () => {
     expect(walk.predecessor(rewGraph, 'a:add', 's2')).to.deep.equal(['c'])
     expect(rewGraph.edge({v: 'c', w: 'a:add'}).outPort).to.equal('const1/output')
   })
-/*
   it('`applyBacktrack` backtracks the lambda function of an application', () => {
     expect(lambda.backtrackApply(applyGraph, 'a')).to.deep.equal({lambda: 'l', path: ['l', 'a']})
   })
 */
+  var aGraph = readFixture('apply.json')
+  it('`resolveLambdaTypes` finds function types for each apply call', () => {
+    var resolvedGraph = lambda.resolveLambdaTypes(aGraph)
+    expect(aGraph).to.be.ok
+  })
 })
 

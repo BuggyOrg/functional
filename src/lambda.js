@@ -1,5 +1,5 @@
 
-import {walk, rewrite} from '@buggyorg/graphtools'
+import {walk, rewrite, utils} from '@buggyorg/graphtools'
 import _ from 'lodash'
 
 export function inner (node) {
@@ -17,7 +17,7 @@ export function functionType (node) {
 
 export function backtrackLambda (graph, node) {
   return walk.walkBack(graph, node, (graph, node) => {
-    return _.invert(graph.node(node).inputPorts || {lambda: []})['lambda']
+    return _.invert(graph.node(node).inputPorts || {function: []})['function']
   })
 }
 
@@ -49,6 +49,17 @@ export function partialize (graph, lambdaNode, path) {
     })
 }
 
+var applyNodes = (graph) => {
+  return _.filter(graph.nodes(), (n) => graph.node(n).id === 'functional/apply')
+}
+
+var findFunctionType = (graph, meta) => {
+  return _(graph.nodes())
+    .map((n) => ({v: n, value: graph.node(n)}))
+    .find((n) => n.value.id === meta)
+    .value()
+}
+
 export function portmapToEdges (graph, innerNode, portmap) {
   return _.flatten(_.map(portmap, (pm) => {
     var pred = walk.predecessor(graph, pm.partial, 'value')
@@ -77,4 +88,18 @@ export function rewriteApply (graph, node) {
     nodes: [innerNode],
     edges: _.concat(connectors, portmapToEdges(graph, innerNode, remainingPorts.portmap))
   })
+}
+
+export function resolveLambdaTypes (graph) {
+  var anodes = applyNodes(graph)
+  console.log(anodes)
+  var types = _(anodes)
+    .map(_.partial(backtrackLambda, graph))
+    .zip(anodes)
+    .map((arr) => ({apply: arr[1], lambda: arr[0][0][0]}))
+    .map((res) => _.merge({}, res, {implementation: graph.node(res.lambda).params.implementation}))
+    .map((res) => _.merge({}, res, {type: findFunctionType(res.implementation)}))
+    .value()
+  console.log(JSON.stringify(types, null, 2))
+  utils.edit(graph)
 }
