@@ -54,10 +54,15 @@ var applyNodes = (graph) => {
 }
 
 var findFunctionType = (graph, meta) => {
-  return _(graph.nodes())
+  var node = _(graph.nodes())
     .map((n) => ({v: n, value: graph.node(n)}))
     .find((n) => n.value.id === meta)
-    .value()
+
+  var rKeys = _.keys(node.value.outputPorts)
+  return {
+    arguments: node.value.inputPorts,
+    return: (rKeys.length === 1) ? node.value.outputPorts[rKeys[0]] : node.value.outputPorts
+  }
 }
 
 export function portmapToEdges (graph, innerNode, portmap) {
@@ -90,16 +95,39 @@ export function rewriteApply (graph, node) {
   })
 }
 
+var updatePorts = (node, ports, applys) => {
+  return _.mapValues(ports, (p) => {
+    if (p === 'function') {
+      return applys[node].type
+    } else if (p === 'function:return') {
+      return applys[node].type.return
+    }
+  })
+}
+
 export function resolveLambdaTypes (graph) {
   var anodes = applyNodes(graph)
-  console.log(anodes)
   var types = _(anodes)
     .map(_.partial(backtrackLambda, graph))
     .zip(anodes)
     .map((arr) => ({apply: arr[1], lambda: arr[0][0][0]}))
     .map((res) => _.merge({}, res, {implementation: graph.node(res.lambda).params.implementation}))
-    .map((res) => _.merge({}, res, {type: findFunctionType(res.implementation)}))
+    .map((res) => _.merge({}, res, {type: findFunctionType(graph, res.implementation)}))
     .value()
-  console.log(JSON.stringify(types, null, 2))
-  utils.edit(graph)
+  var applys = _.merge({}, _.keyBy(types, 'apply'), _.keyBy(types, 'lambda'))
+  var editGraph = utils.edit(graph)
+  editGraph = _.merge({}, editGraph, {
+    nodes: _.map(editGraph.nodes, (n) => {
+      if (!_.has(applys, n.v)) {
+        return n
+      } else {
+        return _.merge({}, n, {value:
+        {
+          inputPorts: updatePorts(n.v, n.value.inputPorts, applys),
+          outputPorts: updatePorts(n.v, n.value.outputPorts, applys)
+        }})
+      }
+    })
+  })
+  return utils.finalize(editGraph)
 }

@@ -83,6 +83,7 @@ describe('Lambda functions', () => {
   var aGraph = readFixture('apply.json')
   it('`resolveLambdaTypes` finds function types for each apply call', () => {
     var resolvedGraph = lambda.resolveLambdaTypes(aGraph)
+    console.log(JSON.stringify(graphlib.json.write(resolvedGraph), null, 2))
     expect(aGraph).to.be.ok
   })
 })
