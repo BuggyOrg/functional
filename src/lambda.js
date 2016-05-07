@@ -17,7 +17,16 @@ export function functionType (node) {
 
 export function backtrackLambda (graph, node) {
   return walk.walkBack(graph, node, (graph, node) => {
-    return _.invert(graph.node(node).inputPorts || {function: []})['function']
+    if (graph.node(node).id === 'functional/lambda') {
+      return []
+    }
+    var functions = _.invert(graph.node(node).inputPorts || {function: []})['function']
+    var generics = _.invert(graph.node(node).inputPorts || {generic: []})['generic']
+    var ports = _.compact(_.map(_.flatten(_.concat(functions, generics)), (v) => '' + v))
+    if (ports.length === 0) {
+      return null
+    }
+    return ports
   })
 }
 
@@ -97,7 +106,7 @@ export function rewriteApply (graph, node) {
 
 var updatePorts = (node, ports, applys) => {
   return _.mapValues(ports, (p) => {
-    if (p === 'function') {
+    if (p === 'function' || p === 'generic') {
       return applys[node].type
     } else if (p === 'function:return') {
       return applys[node].type.return
@@ -110,11 +119,12 @@ export function resolveLambdaTypes (graph) {
   var types = _(anodes)
     .map(_.partial(backtrackLambda, graph))
     .zip(anodes)
-    .map((arr) => ({apply: arr[1], lambda: arr[0][0][0]}))
+    .map((arr) => ({apply: arr[1], lambda: arr[0][0][0], path: arr[0][0]}))
     .map((res) => _.merge({}, res, {implementation: graph.node(res.lambda).params.implementation}))
     .map((res) => _.merge({}, res, {type: findFunctionType(graph, res.implementation)}))
     .value()
-  var applys = _.merge({}, _.keyBy(types, 'apply'), _.keyBy(types, 'lambda'))
+  var args = _.concat([{}], _.map(types, (t) => _.fromPairs(_.map(t.path, (p) => [p, t]))))
+  var applys = _.merge.apply(null, args)
   var editGraph = utils.edit(graph)
   editGraph = _.merge({}, editGraph, {
     nodes: _.map(editGraph.nodes, (n) => {
