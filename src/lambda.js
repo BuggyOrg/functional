@@ -110,6 +110,9 @@ var updatePorts = (node, ports, applys) => {
       return applys[node].type
     } else if (p === 'function:return') {
       return applys[node].type.return
+    } else if (p === 'function:arg') {
+      console.error(JSON.stringify(applys[node]))
+      return applys[node].type.arguments[_.keys(applys[node].type.arguments)[0]]
     }
   })
 }
