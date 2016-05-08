@@ -31,8 +31,7 @@ export function backtrackLambda (graph, node) {
 }
 
 export function backtrackApply (graph, node) {
-  var applyPaths = backtrackLambda(graph, node)
-  console.log(applyPaths)
+  // var applyPaths = backtrackLambda(graph, node)
   return []
 }
 
@@ -111,7 +110,6 @@ var updatePorts = (node, ports, applys) => {
     } else if (p === 'function:return') {
       return applys[node].type.return
     } else if (p === 'function:arg') {
-      console.error(JSON.stringify(applys[node]))
       return applys[node].type.arguments[_.keys(applys[node].type.arguments)[0]]
     }
   })
