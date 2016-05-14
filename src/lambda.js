@@ -3,7 +3,7 @@ import {walk, rewrite, utils} from '@buggyorg/graphtools'
 import _ from 'lodash'
 
 export function inner (node) {
-  if (node.meta !== 'lambda') {
+  if (node.id !== 'functional/lambda') {
     throw new Error('Lambda.inner: Cannot process non lambda node' + JSON.stringify(node))
   } else {
     return node.data

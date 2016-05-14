@@ -15,10 +15,10 @@ var readFixture = (file) => {
 }
 
 describe('Lambda functions', () => {
-/*
+
   it('`inner` reads the enclosed lambda function', () => {
     var lambdaNode = {
-      meta: 'lambda',
+      id: 'functional/lambda',
       data: { meta: 'inner' }
     }
 
@@ -27,7 +27,7 @@ describe('Lambda functions', () => {
 
   it('`functionType` returns input args and return values', () => {
     var lambdaNode = {
-      meta: 'lambda',
+      id: 'functional/lambda',
       data: {meta: 'inner', inputPorts: [{a: 'number'}], outputPorts: [{b: 'number'}]}
     }
 
@@ -36,24 +36,25 @@ describe('Lambda functions', () => {
 
   var applyGraph = readFixture('apply1.json')
   it('`backtrackLambda` returns the path to a lambda function from a node', () => {
-    var lambdaPath = lambda.backtrackLambda(applyGraph, 'a')
+    var lambdaPath = lambda.backtrackLambda(applyGraph, 'apply')
     expect(lambdaPath).to.have.length(1)
     expect(lambdaPath[0]).to.have.length(2)
-    expect(lambdaPath[0][0]).to.equal('l')
+    expect(lambdaPath[0][0]).to.equal('lambda_inc')
   })
 
+/*
   it('`rewriteApply` places the lambda function in the place of apply', () => {
-    var rewGraph = lambda.rewriteApply(applyGraph, 'a')
-    expect(rewGraph.nodes()).to.include('a:inc')
+    var rewGraph = lambda.rewriteApply(applyGraph, 'apply')
+    expect(rewGraph.nodes()).to.include('apply:inc')
   })
 
   it('`rewriteApply` redirects inputs to the lambda function', () => {
-    var rewGraph = lambda.rewriteApply(applyGraph, 'a')
+    var rewGraph = lambda.rewriteApply(applyGraph, 'apply')
     expect(rewGraph.edges().length).to.equal(applyGraph.edges().length + 2)
-    expect(rewGraph.predecessors('a:inc')).to.include('a')
-    expect(rewGraph.successors('a:inc')).to.include('a')
-  })
-
+    expect(rewGraph.predecessors('apply:inc')).to.include('apply')
+    expect(rewGraph.successors('apply:inc')).to.include('apply')
+  })*/
+/*
   var partialGraph = readFixture('partial.json')
   it('`rewriteApply` redirects the input and output of the applied function correctly', () => {
     var rewGraph = lambda.rewriteApply(partialGraph, 'a')
