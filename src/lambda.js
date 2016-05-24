@@ -34,7 +34,7 @@ export function backtrackLambda (graph, node) {
       return []
     }
     if (ports.length === 0) {
-      console.error('stopping@', node)
+      // console.error('stopping@', node)
       return null
     }
     return ports
@@ -119,10 +119,13 @@ export function rewriteApply (graph, node) {
 }
 
 var updatePorts = (node, ports, apply) => {
-  return _.mapValues(ports, (p) => {
+  return _.mapValues(ports, (p, portName) => {
     var srcType = apply.types[apply.index]
     var type
     if (p === 'function' || p === 'generic' || (p === 'function|function:return' && _.keys(srcType.arguments).length > 0)) {
+      if (p === 'generic' && apply.lambda.port !== portName) {
+        return 'generic'
+      }
       type = srcType
     } else if (p === 'function:return' || p === 'function|function:return') {
       type = srcType.return
@@ -142,26 +145,30 @@ var updatePorts = (node, ports, apply) => {
 function partials (graph, apply) {
   return _.reduce(apply.path, (type, p) => {
     var pNode = graph.node(p.node)
-    var lastType = (type.length > 0) ? _.last(type) : apply.type
-    lastType = _.omit(lastType, 'partialize')
+    var lastType = _.cloneDeep((type.length > 0) ? _.last(type) : apply.type)
+    if (lastType.newArguments) {
+      lastType.arguments = lastType.newArguments
+    }
+    lastType = _.omit(lastType, ['partialize', 'newArguments'])
     if (pNode.id !== 'functional/partial') {
       return type.concat(lastType)
     } else {
       var lambda = backtrackLambda(graph, {node: p.node, port: 'value'})
       if (lambda.length !== 0) {
-        var rule = createApplyRule([lambda, p.node])
-        lambda = findFunctionType(graph, lambdaImplementation(graph, rule))
+        var impl = lambdaImplementation(graph, createApplyRule([lambda, p.node]))
+        lambda = findFunctionType(graph, impl)
         var lambdaLambda = backtrackLambda(graph, {node: p.node, port: 'fn'})[0][0]
       } else {
         lambda = null
       }
       return type.concat(_.merge({},
-        _.omit(lastType, 'arguments'),
-        {arguments: _.omit(lastType.arguments, _.keys(lastType.arguments)[pNode.params.partial])},
+        lastType,
+        {newArguments: _.omit(lastType.arguments, _.keys(lastType.arguments)[pNode.params.partial])},
         {partialize: {
           partial: p.node,
           port: _.keys(lastType.arguments)[pNode.params.partial],
           lambda: lambda,
+          implementation: impl,
           applyTo: lambdaLambda
         }}))
     }
@@ -194,15 +201,64 @@ function resolveReferences (graph, pFuns, applys) {
     if (a.type.type === 'reference') {
       var pType = _.omit(partials[graph.parent(a.type.for.node)])
       var type = pType.partialize.lambda
+      var impl = pType.partialize.implementation
       return _.merge({},
-        _.omit(a, ['type', 'types']),
+        _.omit(a, ['type', 'types', 'implementation']),
         {
+          implementation: impl,
           type: type,
           types: _.map(a.types, (t) => type)
         })
     } else {
       return a
     }
+  })
+}
+
+function applyLambdaTypes (graph) {
+  var gr = utils.finalize(graph)
+  return _.merge({}, graph, {
+    nodes: _.map(graph.nodes, (n) => {
+      if (n.value.id === 'functional/lambda' && n.value.outputPorts.fn === 'function') {
+        return _.merge({}, n, {value: {outputPorts: {fn: findFunctionType(gr, n.value.params.implementation)}}})
+      }
+      return n
+    })
+  })
+}
+
+function hasUnfinishedFunctionEdges (graph) {
+  var gr = utils.finalize(graph)
+  return _.filter(graph.edges, (e) => {
+    var vPort = utils.portType(gr, e.v, e.value.outPort)
+    var wPort = utils.portType(gr, e.w, e.value.inPort)
+    return ((vPort === 'generic' || vPort === 'function') && typeof (wPort) === 'object')
+      ||
+      (typeof (vPort) === 'object' && (wPort === 'function' || wPort === 'generic'))
+  }).length
+}
+
+function propagateFunctions (graph) {
+  var gr = utils.finalize(graph)
+  var changePorts = _.keyBy(_.compact(_.map(graph.edges, (e) => {
+    var vPort = utils.portType(gr, e.v, e.value.outPort)
+    var wPort = utils.portType(gr, e.w, e.value.inPort)
+    if ((vPort === 'generic' || vPort === 'function') && typeof (wPort) === 'object') {
+      return { node: e.v, port: e.value.outPort, portType: 'outputPorts', type: wPort}
+    } else if (typeof (vPort) === 'object' && (wPort === 'function' || wPort === 'generic')) {
+      return { node: e.w, port: e.value.inPort, portType: 'inputPorts', type: vPort}
+    }
+  })), 'node')
+  // console.error(changePorts)
+  return _.merge({}, graph,
+  {
+    nodes: _.map(graph.nodes, (n) => {
+      if (_.has(changePorts, n.v)) {
+        // console.error(n.v, changePorts[n.v].portType, changePorts[n.v].port, n.value[changePorts[n.v].portType][changePorts[n.v].port])
+        n.value[changePorts[n.v].portType][changePorts[n.v].port] = changePorts[n.v].type
+      }
+      return n
+    })
   })
 }
 
@@ -217,11 +273,11 @@ export function resolveLambdaTypes (graph) {
     .map((res) => _.merge({}, res, {types: partials(graph, res)}))
     .value()
   var pFuns = partialFunctions(types)
-  console.error(pFuns)
+  // console.error(pFuns)
   types = resolveReferences(graph, pFuns, types)
   // console.error(JSON.stringify(types[0].types, null, 2))
-  console.error(JSON.stringify(types[1], null, 2))
-  var args = _.concat([{}], _.map(types, (t) => _.fromPairs(_.map(t.path, (p, idx) => [p, _.merge({}, t, {index: idx})]))))
+  // console.error(JSON.stringify(types[1], null, 2))
+  var args = _.concat([{}], _.map(types, (t) => _.fromPairs(_.map(t.path, (p, idx) => [p.node, _.merge({}, t, {index: idx})]))))
   var applys = _.merge.apply(null, args)
   var editGraph = utils.edit(graph)
   editGraph = _.merge({}, editGraph, {
@@ -237,9 +293,10 @@ export function resolveLambdaTypes (graph) {
       }
     })
   })
-  console.error(_.map(editGraph.nodes, (n, id) => [n.v, id]))
-  console.error(editGraph.nodes[13])
-  console.error(editGraph.nodes[16])
-  editGraph.a.b.c = 4
+  // console.error(_.map(editGraph.nodes, (n, id) => [n.v, id]))
+  // console.error(JSON.stringify(editGraph.nodes, null, 2))
+  editGraph = applyLambdaTypes(editGraph)
+  editGraph = propagateFunctions(editGraph)
+  // console.log(hasUnfinishedFunctionEdges(editGraph))
   return utils.finalize(editGraph)
 }
