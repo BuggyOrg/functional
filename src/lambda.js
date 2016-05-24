@@ -16,18 +16,29 @@ export function functionType (node) {
 }
 
 export function backtrackLambda (graph, node) {
-  return walk.walkBack(graph, node, (graph, node) => {
+  return walk.walkBack(graph, node, (graph, node, port) => {
+    var lambdaPort = graph.parent(node) && graph.node(graph.parent(node)).isLambda
     if (graph.node(node).id === 'functional/lambda') {
       return []
     }
-    var functions = _.invert(graph.node(node).inputPorts || {function: []})['function']
-    var generics = _.invert(graph.node(node).inputPorts || {generic: []})['generic']
-    var ports = _.compact(_.map(_.flatten(_.concat(functions, generics)), (v) => '' + v))
+    var functions = (_.invertBy(graph.node(node).inputPorts) || {function: []})['function']
+    var generics = (_.invertBy(graph.node(node).inputPorts) || {generic: []})['generic']
+    var ports = _.compact(_.map(_.flatten(_.compact(_.concat(functions, generics))), (v) => '' + v))
+    if (!graph.node(node).atomic && port) {
+      ports = _.filter(ports, (p) => p === port)
+    }
+    if (graph.node(node).id === 'functional/partial' && port === 'value') {
+      return ['value']
+    }
+    if (lambdaPort) {
+      return []
+    }
     if (ports.length === 0) {
+      console.error('stopping@', node)
       return null
     }
     return ports
-  })
+  }, {keepPorts: true})
 }
 
 export function backtrackApply (graph, node) {
@@ -62,6 +73,9 @@ var applyNodes = (graph) => {
 }
 
 var findFunctionType = (graph, meta) => {
+  if (meta.type === 'reference') {
+    return meta
+  }
   var node = _(graph.nodes())
     .map((n) => ({v: n, value: graph.node(n)}))
     .find((n) => n.value.id === meta)
@@ -69,6 +83,7 @@ var findFunctionType = (graph, meta) => {
   var rKeys = _.keys(node.value.outputPorts)
   return {
     arguments: node.value.inputPorts,
+    outputs: node.value.outputPorts,
     return: (rKeys.length === 1) ? node.value.outputPorts[rKeys[0]] : node.value.outputPorts
   }
 }
@@ -103,14 +118,90 @@ export function rewriteApply (graph, node) {
   })
 }
 
-var updatePorts = (node, ports, applys) => {
+var updatePorts = (node, ports, apply) => {
   return _.mapValues(ports, (p) => {
-    if (p === 'function' || p === 'generic') {
-      return applys[node].type
-    } else if (p === 'function:return') {
-      return applys[node].type.return
+    var srcType = apply.types[apply.index]
+    var type
+    if (p === 'function' || p === 'generic' || (p === 'function|function:return' && _.keys(srcType.arguments).length > 0)) {
+      type = srcType
+    } else if (p === 'function:return' || p === 'function|function:return') {
+      type = srcType.return
+      if (type === 'generic') {
+        type = 'type-ref=' + apply.implementation + '@' + _.keys(srcType.outputs)[0]
+      }
     } else if (p === 'function:arg') {
-      return applys[node].type.arguments[_.keys(applys[node].type.arguments)[0]]
+      type = srcType.arguments[_.keys(srcType.arguments)[0]]
+      if (type === 'generic') {
+        type = 'type-ref=' + apply.implementation + '@' + _.keys(srcType.arguments)[0]
+      }
+    }
+    return type
+  })
+}
+
+function partials (graph, apply) {
+  return _.reduce(apply.path, (type, p) => {
+    var pNode = graph.node(p.node)
+    var lastType = (type.length > 0) ? _.last(type) : apply.type
+    lastType = _.omit(lastType, 'partialize')
+    if (pNode.id !== 'functional/partial') {
+      return type.concat(lastType)
+    } else {
+      var lambda = backtrackLambda(graph, {node: p.node, port: 'value'})
+      if (lambda.length !== 0) {
+        var rule = createApplyRule([lambda, p.node])
+        lambda = findFunctionType(graph, lambdaImplementation(graph, rule))
+        var lambdaLambda = backtrackLambda(graph, {node: p.node, port: 'fn'})[0][0]
+      } else {
+        lambda = null
+      }
+      return type.concat(_.merge({},
+        _.omit(lastType, 'arguments'),
+        {arguments: _.omit(lastType.arguments, _.keys(lastType.arguments)[pNode.params.partial])},
+        {partialize: {
+          partial: p.node,
+          port: _.keys(lastType.arguments)[pNode.params.partial],
+          lambda: lambda,
+          applyTo: lambdaLambda
+        }}))
+    }
+  }, [])
+}
+
+function lambdaImplementation (graph, res) {
+  if (graph.node(res.lambda.node).params && graph.node(res.lambda.node).params.implementation) {
+    return graph.node(res.lambda.node).params.implementation
+  } else {
+    return { type: 'reference', for: res.lambda, path: res.path }
+  }
+}
+
+function createApplyRule (arr) {
+  return {apply: arr[1], lambda: arr[0][0][0], path: arr[0][0]}
+}
+
+function partialFunctions (applys) {
+  return _(applys)
+    .map((a) => a.types)
+    .flatten()
+    .filter((t) => t.partialize && t.partialize.lambda)
+    .value()
+}
+
+function resolveReferences (graph, pFuns, applys) {
+  var partials = _.keyBy(pFuns, 'partialize.applyTo.node')
+  return _.map(applys, (a) => {
+    if (a.type.type === 'reference') {
+      var pType = _.omit(partials[graph.parent(a.type.for.node)])
+      var type = pType.partialize.lambda
+      return _.merge({},
+        _.omit(a, ['type', 'types']),
+        {
+          type: type,
+          types: _.map(a.types, (t) => type)
+        })
+    } else {
+      return a
     }
   })
 }
@@ -120,11 +211,17 @@ export function resolveLambdaTypes (graph) {
   var types = _(anodes)
     .map(_.partial(backtrackLambda, graph))
     .zip(anodes)
-    .map((arr) => ({apply: arr[1], lambda: arr[0][0][0], path: arr[0][0]}))
-    .map((res) => _.merge({}, res, {implementation: graph.node(res.lambda).params.implementation}))
+    .map((arr) => createApplyRule(arr))
+    .map((res) => _.merge({}, res, {implementation: lambdaImplementation(graph, res)}))
     .map((res) => _.merge({}, res, {type: findFunctionType(graph, res.implementation)}))
+    .map((res) => _.merge({}, res, {types: partials(graph, res)}))
     .value()
-  var args = _.concat([{}], _.map(types, (t) => _.fromPairs(_.map(t.path, (p) => [p, t]))))
+  var pFuns = partialFunctions(types)
+  console.error(pFuns)
+  types = resolveReferences(graph, pFuns, types)
+  // console.error(JSON.stringify(types[0].types, null, 2))
+  console.error(JSON.stringify(types[1], null, 2))
+  var args = _.concat([{}], _.map(types, (t) => _.fromPairs(_.map(t.path, (p, idx) => [p, _.merge({}, t, {index: idx})]))))
   var applys = _.merge.apply(null, args)
   var editGraph = utils.edit(graph)
   editGraph = _.merge({}, editGraph, {
@@ -134,11 +231,15 @@ export function resolveLambdaTypes (graph) {
       } else {
         return _.merge({}, n, {value:
         {
-          inputPorts: updatePorts(n.v, n.value.inputPorts, applys),
-          outputPorts: updatePorts(n.v, n.value.outputPorts, applys)
+          inputPorts: updatePorts(n.v, n.value.inputPorts, applys[n.v]),
+          outputPorts: updatePorts(n.v, n.value.outputPorts, applys[n.v])
         }})
       }
     })
   })
+  console.error(_.map(editGraph.nodes, (n, id) => [n.v, id]))
+  console.error(editGraph.nodes[13])
+  console.error(editGraph.nodes[16])
+  editGraph.a.b.c = 4
   return utils.finalize(editGraph)
 }
