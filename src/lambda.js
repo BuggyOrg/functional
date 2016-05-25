@@ -78,14 +78,19 @@ var findFunctionType = (graph, meta) => {
   }
   var node = _(graph.nodes())
     .map((n) => ({v: n, value: graph.node(n)}))
-    .find((n) => n.value.id === meta)
+    .find((n) => n.value.branchPath === meta)
 
   var rKeys = _.keys(node.value.outputPorts)
   return {
+    type: 'function',
     arguments: node.value.inputPorts,
     outputs: node.value.outputPorts,
     return: (rKeys.length === 1) ? node.value.outputPorts[rKeys[0]] : node.value.outputPorts
   }
+}
+
+function isFunctionType (type) {
+  return typeof (type) === 'object' && type.type === 'function'
 }
 
 export function portmapToEdges (graph, innerNode, portmap) {
@@ -130,12 +135,13 @@ var updatePorts = (node, ports, apply) => {
     } else if (p === 'function:return' || p === 'function|function:return') {
       type = srcType.return
       if (type === 'generic') {
-        type = 'type-ref=' + apply.implementation + '@' + _.keys(srcType.outputs)[0]
+        type = {type: 'type-ref', node: apply.implementation, port: _.keys(srcType.outputs)[0]}
       }
     } else if (p === 'function:arg') {
       type = srcType.arguments[_.keys(srcType.arguments)[0]]
       if (type === 'generic') {
-        type = 'type-ref=' + apply.implementation + '@' + _.keys(srcType.arguments)[0]
+        var port = (srcType.partialize && srcType.partialize.port) ? srcType.partialize.port : _.keys(srcType.arguments)[0]
+        type = {type: 'type-ref', node: apply.implementation, port: port}
       }
     }
     return type
@@ -232,10 +238,9 @@ function hasUnfinishedFunctionEdges (graph) {
   return _.filter(graph.edges, (e) => {
     var vPort = utils.portType(gr, e.v, e.value.outPort)
     var wPort = utils.portType(gr, e.w, e.value.inPort)
-    return ((vPort === 'generic' || vPort === 'function') && typeof (wPort) === 'object')
-      ||
-      (typeof (vPort) === 'object' && (wPort === 'function' || wPort === 'generic'))
-  }).length
+    return ((vPort === 'generic' || vPort === 'function') && isFunctionType(wPort)) ||
+      (isFunctionType(vPort) && (wPort === 'function' || wPort === 'generic'))
+  }).length !== 0
 }
 
 function propagateFunctions (graph) {
@@ -243,23 +248,21 @@ function propagateFunctions (graph) {
   var changePorts = _.keyBy(_.compact(_.map(graph.edges, (e) => {
     var vPort = utils.portType(gr, e.v, e.value.outPort)
     var wPort = utils.portType(gr, e.w, e.value.inPort)
-    if ((vPort === 'generic' || vPort === 'function') && typeof (wPort) === 'object') {
-      return { node: e.v, port: e.value.outPort, portType: 'outputPorts', type: wPort}
-    } else if (typeof (vPort) === 'object' && (wPort === 'function' || wPort === 'generic')) {
-      return { node: e.w, port: e.value.inPort, portType: 'inputPorts', type: vPort}
+    if ((vPort === 'generic' || vPort === 'function') && isFunctionType(wPort)) {
+      return {node: e.v, port: e.value.outPort, portType: 'outputPorts', type: wPort}
+    } else if (isFunctionType(vPort) && (wPort === 'function' || wPort === 'generic')) {
+      return {node: e.w, port: e.value.inPort, portType: 'inputPorts', type: vPort}
     }
   })), 'node')
-  // console.error(changePorts)
   return _.merge({}, graph,
-  {
-    nodes: _.map(graph.nodes, (n) => {
-      if (_.has(changePorts, n.v)) {
-        // console.error(n.v, changePorts[n.v].portType, changePorts[n.v].port, n.value[changePorts[n.v].portType][changePorts[n.v].port])
-        n.value[changePorts[n.v].portType][changePorts[n.v].port] = changePorts[n.v].type
-      }
-      return n
+    {
+      nodes: _.map(graph.nodes, (n) => {
+        if (_.has(changePorts, n.v)) {
+          n.value[changePorts[n.v].portType][changePorts[n.v].port] = changePorts[n.v].type
+        }
+        return n
+      })
     })
-  })
 }
 
 export function resolveLambdaTypes (graph) {
@@ -296,7 +299,15 @@ export function resolveLambdaTypes (graph) {
   // console.error(_.map(editGraph.nodes, (n, id) => [n.v, id]))
   // console.error(JSON.stringify(editGraph.nodes, null, 2))
   editGraph = applyLambdaTypes(editGraph)
-  editGraph = propagateFunctions(editGraph)
+  var cnt = 0
+  while (hasUnfinishedFunctionEdges(editGraph)) {
+    editGraph = propagateFunctions(editGraph)
+    cnt++
+    if (cnt > 77) {
+      console.error('maximum number of function propagations reached (77). Something is wrong.')
+      process.exit(1)
+    }
+  }
   // console.log(hasUnfinishedFunctionEdges(editGraph))
   return utils.finalize(editGraph)
 }
