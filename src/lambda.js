@@ -34,7 +34,6 @@ export function backtrackLambda (graph, node) {
       return []
     }
     if (ports.length === 0) {
-      // console.error('stopping@', node)
       return null
     }
     return ports
@@ -276,10 +275,7 @@ export function resolveLambdaTypes (graph) {
     .map((res) => _.merge({}, res, {types: partials(graph, res)}))
     .value()
   var pFuns = partialFunctions(types)
-  // console.error(pFuns)
   types = resolveReferences(graph, pFuns, types)
-  // console.error(JSON.stringify(types[0].types, null, 2))
-  // console.error(JSON.stringify(types[1], null, 2))
   var args = _.concat([{}], _.map(types, (t) => _.fromPairs(_.map(t.path, (p, idx) => [p.node, _.merge({}, t, {index: idx})]))))
   var applys = _.merge.apply(null, args)
   var editGraph = utils.edit(graph)
@@ -296,8 +292,6 @@ export function resolveLambdaTypes (graph) {
       }
     })
   })
-  // console.error(_.map(editGraph.nodes, (n, id) => [n.v, id]))
-  // console.error(JSON.stringify(editGraph.nodes, null, 2))
   editGraph = applyLambdaTypes(editGraph)
   var cnt = 0
   while (hasUnfinishedFunctionEdges(editGraph)) {
