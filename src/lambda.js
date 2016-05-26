@@ -79,12 +79,22 @@ var findFunctionType = (graph, meta) => {
     .map((n) => ({v: n, value: graph.node(n)}))
     .find((n) => n.value.branchPath === meta)
 
-  var rKeys = _.keys(node.value.outputPorts)
+  var mapGenerics = (type, key) => {
+    if (type === 'generic') {
+      return {type: 'type-ref', node: meta, port: key}
+    }
+    return type
+  }
+
+  var ins = _.mapValues(node.value.inputPorts, mapGenerics)
+  var outs = _.mapValues(node.value.outputPorts, mapGenerics)
+
+  var rKeys = _.keys(outs)
   return {
     type: 'function',
-    arguments: node.value.inputPorts,
-    outputs: node.value.outputPorts,
-    return: (rKeys.length === 1) ? node.value.outputPorts[rKeys[0]] : node.value.outputPorts
+    arguments: ins,
+    outputs: outs,
+    return: (rKeys.length === 1) ? outs[rKeys[0]] : outs
   }
 }
 
@@ -126,20 +136,24 @@ var updatePorts = (node, ports, apply) => {
   return _.mapValues(ports, (p, portName) => {
     var srcType = apply.types[apply.index]
     var type
-    if (p === 'function' || p === 'generic' || (p === 'function|function:return' && _.keys(srcType.arguments).length > 0)) {
+    if (p === 'function' || p === 'generic' || (p === 'function|function:return' && _.keys(srcType.arguments).length > 1)) {
       if (p === 'generic' && apply.lambda.port !== portName) {
         return 'generic'
       }
-      type = srcType
+      if (p === 'function|function:return') {
+        type = _.merge({}, _.omit(srcType, ['arguments', 'newArguments']), {arguments: srcType.newArguments})
+      } else {
+        type = srcType
+      }
     } else if (p === 'function:return' || p === 'function|function:return') {
       type = srcType.return
       if (type === 'generic') {
         type = {type: 'type-ref', node: apply.implementation, port: _.keys(srcType.outputs)[0]}
       }
     } else if (p === 'function:arg') {
-      type = srcType.arguments[_.keys(srcType.arguments)[0]]
+      var port = (srcType.partialize && srcType.partialize.port) ? srcType.partialize.port : _.keys(srcType.arguments)[0]
+      type = srcType.arguments[port]
       if (type === 'generic') {
-        var port = (srcType.partialize && srcType.partialize.port) ? srcType.partialize.port : _.keys(srcType.arguments)[0]
         type = {type: 'type-ref', node: apply.implementation, port: port}
       }
     }
