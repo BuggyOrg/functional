@@ -35,7 +35,7 @@
         "atomic": true,
         "path": [],
         "params": {
-          "implementation": "math/inc"
+          "implementation": "inc_lambda"
         },
         "branchPath": "lambda_inc",
         "branch": "lambda_inc",
