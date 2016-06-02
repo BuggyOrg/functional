@@ -1,6 +1,6 @@
 {
   "name": "@buggyorg/functional",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Transformation of functional concepts.",
   "main": "lib/api.js",
   "scripts": {
