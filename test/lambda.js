@@ -87,11 +87,12 @@ describe('Lambda functions', () => {
     expect(resolvedGraph).to.be.ok
   })
 
+/*
   it('`resolveLambdaTypes` can set functions on the path to apply', () => {
     var mapGraph = lambda.resolveLambdaTypes(readFixture('map.json'))
     expect(mapGraph.node('mapInc:upv').inputPorts.value).to.be.an('object')
     expect(mapGraph.node('mapInc:upv').outputPorts.stream).to.be.an('object')
-  })
+  })*/
 /*
   it('`resolveLambdaTypes` can handle generic lambda input values', () => {
     var genGraph = lambda.resolveLambdaTypes(readFixture('apply_generic.json'))

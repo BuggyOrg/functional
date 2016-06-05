@@ -34,9 +34,6 @@ export function backtrackLambda (graph, node) {
       return []
     }
     if (ports.length === 0) {
-      /* if (graph.node(node).inputPorts.fn) {
-        console.error('dead end for ', node, port, graph.node(node).inputPorts.fn.arguments)
-      }*/
       return null
     }
     return ports
@@ -71,7 +68,7 @@ export function partialize (graph, lambdaNode, path) {
 }
 
 var applyNodes = (graph) => {
-  return _.filter(graph.nodes(), (n) => graph.node(n).id === 'functional/apply')
+  return _.filter(graph.nodes(), (n) => graph.node(n).id === 'functional/call')
 }
 
 var findFunctionType = (graph, meta) => {
@@ -139,16 +136,18 @@ var updatePorts = (node, ports, apply) => {
   return _.mapValues(ports, (p, portName) => {
     var srcType = apply.types[apply.index]
     var type
-    if (p === 'function' || p === 'generic' || (p === 'function|function:return' && _.keys(srcType.arguments).length > 1)) {
+    if (p === 'function' || p === 'generic' || p === 'function:partial') {
       if (p === 'generic' && apply.lambda.port !== portName) {
         return 'generic'
       }
-      if (p === 'function|function:return') {
+      if (p === 'function:partial') {
         type = _.merge({}, _.omit(srcType, ['arguments', 'newArguments']), {arguments: srcType.newArguments})
+      } else if (srcType.type === 'reference' && srcType.for.node === node && srcType.for.port === portName) {
+        type = 'generic'
       } else {
         type = srcType
       }
-    } else if (p === 'function:return' || p === 'function|function:return') {
+    } else if (p === 'function:return') {
       type = srcType.return
       if (type === 'generic') {
         type = {type: 'type-ref', node: apply.implementation, port: _.keys(srcType.outputs)[0]}
@@ -192,6 +191,7 @@ function partials (graph, apply) {
         {partialize: {
           partial: p.node,
           port: _.keys(lastType.arguments)[pNode.params.partial],
+          portIndex: pNode.params.partial,
           lambda: lambda,
           implementation: impl,
           applyTo: lambdaLambda
@@ -223,7 +223,7 @@ function partialFunctions (applys) {
 function resolveReferences (graph, pFuns, applys) {
   var partials = _.keyBy(pFuns, 'partialize.applyTo.node')
   return _.map(applys, (a) => {
-    if (a.type.type === 'reference') {
+    if (a.type.type === 'reference' && _.has(partials, graph.parent(a.type.for.node))) {
       var pType = _.omit(partials[graph.parent(a.type.for.node)])
       var type = pType.partialize.lambda
       var impl = pType.partialize.implementation
@@ -232,11 +232,30 @@ function resolveReferences (graph, pFuns, applys) {
         {
           implementation: impl,
           type: type,
-          types: _.map(a.types, (t) => type)
+          types: _.reduce(a.types, (types, t) => {
+            var lastType = _.cloneDeep((types.length > 0) ? _.last(types) : type)
+            if (lastType.newArguments) {
+              lastType.arguments = lastType.newArguments
+            }
+            if (!t.partialize) {
+              return _.concat(types, [lastType])
+            } else {
+              return types.concat(_.merge({},
+                lastType,
+                {newArguments: _.omit(lastType.arguments, _.keys(lastType.arguments)[t.partialize.portIndex])},
+                {partialize: { port: _.keys(lastType.arguments)[t.portIndex] }}))
+            }
+          }, [])
         })
-    } else {
-      return a
+    } else if (a.type.type === 'reference') {
+      var portType = utils.portType(graph, a.type.for.node, a.type.for.port)
+      if (typeof (portType) === 'string' && portType !== 'generic') {
+        return portType
+      } else {
+        return {type: 'type-ref', node: a.type.for.node, port: a.type.for.port}
+      }
     }
+    return a
   })
 }
 
@@ -302,7 +321,6 @@ function processApplications (graph, anodes) {
     .map((p) => ({node: p.partial, port: 'value'}))
     .value()
   if (ppaths.length > 0) {
-    // console.error(JSON.stringify(types, null, 2))
     graph = processApplications(graph, ppaths)
     types = _(anodes)
       .map(_.partial(backtrackLambda, graph))
@@ -312,8 +330,6 @@ function processApplications (graph, anodes) {
       .map((res) => _.merge({}, res, {type: findFunctionType(graph, res.implementation)}))
       .map((res) => _.merge({}, res, {types: partials(graph, res)}))
       .value()
-    // console.error(types[0].types[3])
-    // console.error(JSON.stringify(types, null, 2))
     pFuns = partialFunctions(types)
   }
   types = resolveReferences(graph, pFuns, types)
@@ -334,7 +350,8 @@ function processApplications (graph, anodes) {
         return _.merge({}, n, {value:
         {
           inputPorts: updatePorts(n.v, n.value.inputPorts, applys[n.v]),
-          outputPorts: updatePorts(n.v, n.value.outputPorts, applys[n.v])
+          outputPorts: updatePorts(n.v, n.value.outputPorts, applys[n.v]),
+          partial: applys[n.v].types[applys[n.v].index].partialize
         }})
       }
     })
