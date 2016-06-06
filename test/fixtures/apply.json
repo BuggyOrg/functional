@@ -18,7 +18,10 @@
         "path": [],
         "branchPath": "in",
         "branch": "in",
-        "name": "in"
+        "name": "in",
+        "settings": {
+          "argumentOrdering": ["output"]
+        }
       }
     },
     {
@@ -36,7 +39,10 @@
         "path": [],
         "branchPath": "strToNum",
         "branch": "strToNum",
-        "name": "strToNum"
+        "name": "strToNum",
+        "settings": {
+          "argumentOrdering": ["input", "output"]
+        }
       }
     },
     {
@@ -55,7 +61,10 @@
         },
         "branchPath": "lambda_inc",
         "branch": "lambda_inc",
-        "name": "lambda_inc"
+        "name": "lambda_inc",
+        "settings": {
+          "argumentOrdering": ["fn"]
+        }
       }
     },
     {
@@ -68,6 +77,9 @@
         },
         "outputPorts": {
           "inc": "int"
+        },
+        "settings": {
+          "argumentOrdering": ["i", "inc"]
         },
         "atomic": false,
         "implementation": {
@@ -160,7 +172,10 @@
         ],
         "parent": "inc_lambda",
         "branchPath": "inc_lambda:add",
-        "branch": "add"
+        "branch": "add",
+        "settings": {
+          "argumentOrdering": ["s1", "s2", "sum"]
+        }
       },
       "parent": "inc_lambda"
     },
@@ -184,7 +199,10 @@
         ],
         "parent": "inc_lambda",
         "branchPath": "inc_lambda:c",
-        "branch": "c"
+        "branch": "c",
+        "settings": {
+          "argumentOrdering": ["output"]
+        }
       },
       "parent": "inc_lambda"
     },
@@ -205,7 +223,10 @@
         "path": [],
         "branchPath": "apply",
         "branch": "apply",
-        "name": "apply"
+        "name": "apply",
+        "settings": {
+          "argumentOrdering": ["fn", "value", "result"]
+        }
       }
     },
     {
@@ -223,7 +244,10 @@
         "path": [],
         "branchPath": "numToStr",
         "branch": "numToStr",
-        "name": "numToStr"
+        "name": "numToStr",
+        "settings": {
+          "argumentOrdering": ["input", "output"]
+        }
       }
     },
     {
@@ -239,7 +263,10 @@
         "path": [],
         "branchPath": "out",
         "branch": "out",
-        "name": "out"
+        "name": "out",
+        "settings": {
+          "argumentOrdering": ["input"]
+        }
       }
     }
   ],
