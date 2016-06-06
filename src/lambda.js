@@ -93,6 +93,7 @@ var findFunctionType = (graph, meta) => {
   return {
     type: 'function',
     arguments: ins,
+    argumentOrdering: node.value.settings.argumentOrdering,
     outputs: outs,
     return: (rKeys.length === 1) ? outs[rKeys[0]] : outs
   }
