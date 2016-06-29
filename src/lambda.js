@@ -1,5 +1,5 @@
 
-import {walk, rewrite, utils} from '@buggyorg/graphtools'
+import {walk, utils, graph as graphAPI} from '@buggyorg/graphtools'
 import _ from 'lodash'
 
 export function inner (node) {
@@ -109,28 +109,6 @@ export function portmapToEdges (graph, innerNode, portmap) {
     var edge = graph.edge({v: pred, w: pm.partial})
     return _.map(pred, (p) => ({v: p, w: innerNode.v, value: {inPort: pm.port, outPort: edge.outPort}}))
   }))
-}
-
-export function rewriteApply (graph, node) {
-  var paths = backtrackLambda(graph, node)
-  var innerNode = inner(graph.node(paths[0][0]))
-  var remainingPorts = partialize(graph, innerNode, paths[0].slice(1, -1))
-  if (remainingPorts.input.length !== 1) {
-    throw new Error(`Cannot apply value on function with ${remainingPorts.input.length} inputs.
-      Apply only works with exactly one input, use partial.
-
-      Apply Node: ${node}
-      Lambda Path: ${paths[0]}
-      Remaining Input Ports: ${remainingPorts.input}`)
-  }
-  var connectors = rewrite.edgeConnectors(graph, node, {
-    value: {node: innerNode.v, port: remainingPorts.input[0]},
-    result: {node: innerNode.v, port: remainingPorts.output[0]}
-  })
-  return rewrite.apply(graph, node, {
-    nodes: [innerNode],
-    edges: _.concat(connectors, portmapToEdges(graph, innerNode, remainingPorts.portmap))
-  })
 }
 
 var updatePorts = (node, ports, apply) => {
@@ -261,7 +239,7 @@ function resolveReferences (graph, pFuns, applys) {
 }
 
 function applyLambdaTypes (graph) {
-  var gr = utils.finalize(graph)
+  var gr = graphAPI.importJSON(graph)
   return _.merge({}, graph, {
     nodes: _.map(graph.nodes, (n) => {
       if (n.value.id === 'functional/lambda' && n.value.outputPorts.fn === 'function') {
@@ -273,7 +251,7 @@ function applyLambdaTypes (graph) {
 }
 
 function hasUnfinishedFunctionEdges (graph) {
-  var gr = utils.finalize(graph)
+  var gr = graphAPI.importJSON(graph)
   return _.filter(graph.edges, (e) => {
     var vPort = utils.portType(gr, e.v, e.value.outPort)
     var wPort = utils.portType(gr, e.w, e.value.inPort)
@@ -283,7 +261,7 @@ function hasUnfinishedFunctionEdges (graph) {
 }
 
 function propagateFunctions (graph) {
-  var gr = utils.finalize(graph)
+  var gr = graphAPI.importJSON(graph)
   var changePorts = _.keyBy(_.compact(_.map(graph.edges, (e) => {
     var vPort = utils.portType(gr, e.v, e.value.outPort)
     var wPort = utils.portType(gr, e.w, e.value.inPort)
@@ -336,7 +314,7 @@ function processApplications (graph, anodes) {
   types = resolveReferences(graph, pFuns, types)
   var args = _.concat([{}], _.map(types, (t) => _.fromPairs(_.map(t.path, (p, idx) => [p.node, _.merge({}, t, {index: idx})]))))
   var applys = _.merge.apply(null, args)
-  var editGraph = utils.edit(graph)
+  var editGraph = graphAPI.toJSON(graph)
   editGraph = _.merge({}, editGraph, {
     nodes: _.map(editGraph.nodes, (n) => {
       if (!_.has(applys, n.v)) {
@@ -357,13 +335,13 @@ function processApplications (graph, anodes) {
       }
     })
   })
-  return utils.finalize(editGraph)
+  return graphAPI.importJSON(editGraph)
 }
 
 export function resolveLambdaTypes (graph) {
   var anodes = applyNodes(graph)
   var resGraph = processApplications(graph, anodes)
-  var editGraph = utils.edit(resGraph)
+  var editGraph = graphAPI.toJSON(resGraph)
   editGraph = applyLambdaTypes(editGraph)
   var cnt = 0
   while (hasUnfinishedFunctionEdges(editGraph)) {
@@ -375,5 +353,5 @@ export function resolveLambdaTypes (graph) {
     }
   }
   // console.log(hasUnfinishedFunctionEdges(editGraph))
-  return utils.finalize(editGraph)
+  return graphAPI.importJSON(editGraph)
 }
