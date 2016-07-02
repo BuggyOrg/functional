@@ -71,13 +71,13 @@ var applyNodes = (graph) => {
   return _.filter(graph.nodes(), (n) => graph.node(n).id === 'functional/call')
 }
 
-var findFunctionType = (graph, meta) => {
+export function findFunctionType (graph, meta) {
   if (meta.type === 'reference') {
     return meta
   }
   var node = _(graph.nodes())
     .map((n) => ({v: n, value: graph.node(n)}))
-    .find((n) => n.value.branchPath === meta)
+    .find((n) => n.v === meta)
 
   var mapGenerics = (type, key) => {
     if (type === 'generic') {
