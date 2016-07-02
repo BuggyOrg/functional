@@ -1,3 +1,3 @@
-import {resolveLambdaTypes, findFunctionType} from './lambda.js'
+import {resolveLambdaTypes, getLambdaFunctionType} from './lambda.js'
 
-export {resolveLambdaTypes, findFunctionType as getLambdaFunctionType}
+export {resolveLambdaTypes, getLambdaFunctionType}

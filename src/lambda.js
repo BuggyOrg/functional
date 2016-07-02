@@ -99,6 +99,10 @@ export function findFunctionType (graph, meta) {
   }
 }
 
+export function getLambdaFunctionType (graph, meta) {
+  return findFunctionType(graph, lambdaImplementation(graph, meta))
+}
+
 function isFunctionType (type) {
   return typeof (type) === 'object' && type.type === 'function'
 }
