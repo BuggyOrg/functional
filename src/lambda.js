@@ -75,9 +75,7 @@ export function findFunctionType (graph, meta) {
   if (meta.type === 'reference') {
     return meta
   }
-  var node = _(graph.nodes())
-    .map((n) => ({v: n, value: graph.node(n)}))
-    .find((n) => n.v === meta)
+  var node = {v: meta, value: graph.node(meta)}
 
   var mapGenerics = (type, key) => {
     if (type === 'generic') {
@@ -99,8 +97,8 @@ export function findFunctionType (graph, meta) {
   }
 }
 
-export function getLambdaFunctionType (graph, meta) {
-  return findFunctionType(graph, lambdaImplementation(graph, meta))
+export function getLambdaFunctionType (graph, node) {
+  return findFunctionType(graph, graph.children(node)[0])
 }
 
 function isFunctionType (type) {
