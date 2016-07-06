@@ -1,0 +1,749 @@
+{
+  "options": {
+    "directed": true,
+    "multigraph": true,
+    "compound": true
+  },
+  "nodes": [
+    {
+      "v": "stdout_9",
+      "value": {
+        "id": "io/stdout",
+        "version": "0.3.0",
+        "inputPorts": {
+          "input": "string"
+        },
+        "outputPorts": {},
+        "settings": {
+          "sideEffects": true,
+          "argumentOrdering": [
+            "input"
+          ]
+        },
+        "atomic": true,
+        "isSink": true,
+        "path": [],
+        "branchPath": "stdout_9",
+        "branch": "stdout_9",
+        "name": "stdout_9",
+        "recursive": false,
+        "typeHint": {}
+      }
+    },
+    {
+      "v": "number_to_string_10",
+      "value": {
+        "id": "translator/number_to_string",
+        "version": "0.2.0",
+        "inputPorts": {
+          "input": "int64"
+        },
+        "outputPorts": {
+          "output": "string"
+        },
+        "atomic": true,
+        "settings": {
+          "argumentOrdering": [
+            "input",
+            "output"
+          ]
+        },
+        "path": [],
+        "branchPath": "number_to_string_10",
+        "branch": "number_to_string_10",
+        "name": "number_to_string_10",
+        "recursive": false,
+        "typeHint": {}
+      }
+    },
+    {
+      "v": "fac_11:const(1)_8",
+      "value": {
+        "id": "math/const",
+        "version": "0.3.0",
+        "inputPorts": {},
+        "outputPorts": {
+          "output": "int64"
+        },
+        "atomic": true,
+        "settings": {
+          "argumentOrdering": [
+            "output"
+          ]
+        },
+        "path": [
+          {
+            "meta": "fac",
+            "branch": "fac_11",
+            "branchPath": "fac_11"
+          }
+        ],
+        "params": {
+          "value": 1
+        },
+        "parent": "fac_11",
+        "branchPath": "fac_11:const(1)_8",
+        "branch": "const(1)_8",
+        "recursive": false,
+        "typeHint": {}
+      }
+    },
+    {
+      "v": "string_to_number_12",
+      "value": {
+        "id": "translator/string_to_number",
+        "version": "0.2.0",
+        "inputPorts": {
+          "input": "string"
+        },
+        "outputPorts": {
+          "output": "int64"
+        },
+        "atomic": true,
+        "settings": {
+          "argumentOrdering": [
+            "input",
+            "output"
+          ]
+        },
+        "path": [],
+        "branchPath": "string_to_number_12",
+        "branch": "string_to_number_12",
+        "name": "string_to_number_12",
+        "recursive": false,
+        "typeHint": {}
+      }
+    },
+    {
+      "v": "stdin_13",
+      "value": {
+        "id": "io/stdin",
+        "version": "0.3.0",
+        "inputPorts": {},
+        "outputPorts": {
+          "output": "string"
+        },
+        "settings": {
+          "sideEffects": true,
+          "argumentOrdering": [
+            "output"
+          ]
+        },
+        "atomic": true,
+        "path": [],
+        "branchPath": "stdin_13",
+        "branch": "stdin_13",
+        "name": "stdin_13",
+        "recursive": false,
+        "typeHint": {}
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7:<_5_copy_1",
+      "value": {
+        "id": "functional/lambda",
+        "version": "0.2.0",
+        "atomic": true,
+        "outputPorts": {
+          "fn": {
+            "type": "function",
+            "arguments": {
+              "n": "int64"
+            },
+            "argumentOrdering": [
+              "n",
+              "value",
+              "acc"
+            ],
+            "outputs": {
+              "value": "bool"
+            },
+            "return": "bool"
+          }
+        },
+        "settings": {
+          "argumentOrdering": [
+            "fn"
+          ]
+        }
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7:<_5_copy_1:impl",
+      "value": {
+        "id": "fac_11:fac_tr_7:<_5_copy_1:impl",
+        "inputPorts": {
+          "n": "int64",
+          "acc": "int64"
+        },
+        "settings": {
+          "argumentOrdering": [
+            "n",
+            "value",
+            "acc"
+          ]
+        },
+        "outputPorts": {
+          "value": "bool"
+        }
+      },
+      "parent": "fac_11:fac_tr_7:<_5_copy_1"
+    },
+    {
+      "v": "fac_11:fac_tr_7:<_5_copy_2",
+      "value": {
+        "id": "math/less",
+        "version": "0.2.1",
+        "inputPorts": {
+          "isLess": "int64",
+          "than": "int64"
+        },
+        "outputPorts": {
+          "value": "bool"
+        },
+        "atomic": true,
+        "settings": {
+          "argumentOrdering": [
+            "isLess",
+            "than",
+            "value"
+          ]
+        },
+        "path": [
+          {
+            "meta": "fac",
+            "branch": "fac_11",
+            "branchPath": "fac_11"
+          },
+          {
+            "meta": "fac_tr",
+            "branch": "fac_tr_7",
+            "branchPath": "fac_11:fac_tr_7"
+          }
+        ],
+        "parent": "fac_11:fac_tr_7",
+        "branchPath": "fac_11:fac_tr_7:<_5",
+        "branch": "<_5",
+        "recursive": false,
+        "typeHint": {}
+      },
+      "parent": "fac_11:fac_tr_7:<_5_copy_1:impl"
+    },
+    {
+      "v": "fac_11:fac_tr_7:const(1)_6_copy_3",
+      "value": {
+        "id": "math/const",
+        "version": "0.3.0",
+        "inputPorts": {},
+        "outputPorts": {
+          "output": "int64"
+        },
+        "atomic": true,
+        "settings": {
+          "argumentOrdering": [
+            "output"
+          ]
+        },
+        "path": [
+          {
+            "meta": "fac",
+            "branch": "fac_11",
+            "branchPath": "fac_11"
+          },
+          {
+            "meta": "fac_tr",
+            "branch": "fac_tr_7",
+            "branchPath": "fac_11:fac_tr_7"
+          }
+        ],
+        "params": {
+          "value": 1
+        },
+        "parent": "fac_11:fac_tr_7",
+        "branchPath": "fac_11:fac_tr_7:const(1)_6",
+        "branch": "const(1)_6",
+        "recursive": false,
+        "typeHint": {}
+      },
+      "parent": "fac_11:fac_tr_7:<_5_copy_1:impl"
+    },
+    {
+      "v": "fac_11:fac_tr_7_copy_4",
+      "value": {
+        "id": "functional/lambda",
+        "version": "0.2.0",
+        "atomic": true,
+        "outputPorts": {
+          "fn": {
+            "type": "function",
+            "arguments": {
+              "acc": "int64"
+            },
+            "argumentOrdering": [
+              "acc",
+              "acc_out",
+              "n",
+              "n_new"
+            ],
+            "outputs": {
+              "acc_out": "int64"
+            },
+            "return": "int64"
+          }
+        },
+        "settings": {
+          "argumentOrdering": [
+            "fn"
+          ]
+        }
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7_copy_4:impl",
+      "value": {
+        "id": "fac_11:fac_tr_7_copy_4:impl",
+        "inputPorts": {
+          "acc": "int64",
+          "n": "int64"
+        },
+        "settings": {
+          "argumentOrdering": [
+            "acc",
+            "acc_out",
+            "n",
+            "n_new"
+          ]
+        },
+        "outputPorts": {
+          "acc_new": "int64",
+          "n_new": "int64"
+        }
+      },
+      "parent": "fac_11:fac_tr_7_copy_4"
+    },
+    {
+      "v": "fac_11:fac_tr_7:-_2_copy_5",
+      "value": {
+        "id": "functional/lambda",
+        "version": "0.2.0",
+        "atomic": true,
+        "outputPorts": {
+          "fn": {
+            "type": "function",
+            "arguments": {
+              "n": "int64"
+            },
+            "argumentOrdering": [
+              "n",
+              "difference",
+              "acc",
+              "product"
+            ],
+            "outputs": {
+              "difference": "int64"
+            },
+            "return": "int64"
+          }
+        },
+        "settings": {
+          "argumentOrdering": [
+            "fn"
+          ]
+        }
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7:-_2_copy_5:impl",
+      "value": {
+        "id": "fac_11:fac_tr_7:-_2_copy_5:impl",
+        "inputPorts": {
+          "n": "int64",
+          "acc": "int64"
+        },
+        "settings": {
+          "argumentOrdering": [
+            "n",
+            "difference",
+            "acc",
+            "product"
+          ]
+        },
+        "outputPorts": {
+          "difference": "int64",
+          "product": "int64"
+        }
+      },
+      "parent": "fac_11:fac_tr_7:-_2_copy_5"
+    },
+    {
+      "v": "fac_11:fac_tr_7:-_2_copy_6",
+      "value": {
+        "id": "math/sub",
+        "version": "0.4.0",
+        "inputPorts": {
+          "minuend": "int64",
+          "subtrahend": "int64"
+        },
+        "outputPorts": {
+          "difference": "int64"
+        },
+        "atomic": true,
+        "settings": {
+          "argumentOrdering": [
+            "minuend",
+            "subtrahend",
+            "difference"
+          ]
+        },
+        "path": [
+          {
+            "meta": "fac",
+            "branch": "fac_11",
+            "branchPath": "fac_11"
+          },
+          {
+            "meta": "fac_tr",
+            "branch": "fac_tr_7",
+            "branchPath": "fac_11:fac_tr_7"
+          }
+        ],
+        "parent": "fac_11:fac_tr_7",
+        "branchPath": "fac_11:fac_tr_7:-_2",
+        "branch": "-_2",
+        "recursive": false,
+        "typeHint": {}
+      },
+      "parent": "fac_11:fac_tr_7:-_2_copy_5:impl"
+    },
+    {
+      "v": "fac_11:fac_tr_7:const(1)_3_copy_7",
+      "value": {
+        "id": "math/const",
+        "version": "0.3.0",
+        "inputPorts": {},
+        "outputPorts": {
+          "output": "int64"
+        },
+        "atomic": true,
+        "settings": {
+          "argumentOrdering": [
+            "output"
+          ]
+        },
+        "path": [
+          {
+            "meta": "fac",
+            "branch": "fac_11",
+            "branchPath": "fac_11"
+          },
+          {
+            "meta": "fac_tr",
+            "branch": "fac_tr_7",
+            "branchPath": "fac_11:fac_tr_7"
+          }
+        ],
+        "params": {
+          "value": 1
+        },
+        "parent": "fac_11:fac_tr_7",
+        "branchPath": "fac_11:fac_tr_7:const(1)_3",
+        "branch": "const(1)_3",
+        "recursive": false,
+        "typeHint": {}
+      },
+      "parent": "fac_11:fac_tr_7:-_2_copy_5:impl"
+    },
+    {
+      "v": "fac_11:fac_tr_7:*_4_copy_9",
+      "value": {
+        "id": "math/multiply",
+        "version": "0.3.0",
+        "inputPorts": {
+          "m1": "int64",
+          "m2": "int64"
+        },
+        "outputPorts": {
+          "product": "int64"
+        },
+        "atomic": true,
+        "settings": {
+          "argumentOrdering": [
+            "m1",
+            "m2",
+            "product"
+          ]
+        },
+        "path": [
+          {
+            "meta": "fac",
+            "branch": "fac_11",
+            "branchPath": "fac_11"
+          },
+          {
+            "meta": "fac_tr",
+            "branch": "fac_tr_7",
+            "branchPath": "fac_11:fac_tr_7"
+          }
+        ],
+        "parent": "fac_11:fac_tr_7",
+        "branchPath": "fac_11:fac_tr_7:*_4",
+        "branch": "*_4",
+        "recursive": false,
+        "typeHint": {}
+      },
+      "parent": "fac_11:fac_tr_7:-_2_copy_5:impl"
+    },
+    {
+      "v": "fac_11:fac_tr_7_tailrec",
+      "value": {
+        "id": "tailrec",
+        "atomic": true,
+        "outputPorts": {
+          "value": "int64"
+        },
+        "tailrecConfig": {
+          "tailcalls": [
+            "f_0"
+          ],
+          "inputPorts": [
+            "n",
+            "acc"
+          ],
+          "predicateCount": 1,
+          "returnPort": "acc"
+        },
+        "inputPorts": {
+          "p_0": {
+            "type": "function",
+            "arguments": {
+              "n": "int64"
+            },
+            "argumentOrdering": [
+              "n",
+              "value",
+              "acc"
+            ],
+            "outputs": {
+              "value": "bool"
+            },
+            "return": "bool"
+          },
+          "f_0": {
+            "type": "function",
+            "arguments": {
+              "n": "int64"
+            },
+            "argumentOrdering": [
+              "n",
+              "difference",
+              "acc",
+              "product"
+            ],
+            "outputs": {
+              "difference": "int64"
+            },
+            "return": "int64"
+          },
+          "f_1": {
+            "type": "function",
+            "arguments": {
+              "acc": "int64"
+            },
+            "argumentOrdering": [
+              "acc",
+              "acc_out",
+              "n",
+              "n_new"
+            ],
+            "outputs": {
+              "acc_out": "int64"
+            },
+            "return": "int64"
+          },
+          "initial_n": "int64",
+          "initial_acc": "int64"
+        },
+        "settings": {
+          "argumentOrdering": [
+            "p_0",
+            "f_0",
+            "f_1",
+            "initial_n",
+            "initial_acc"
+          ]
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "v": "stdin_13",
+      "w": "string_to_number_12",
+      "value": {
+        "outPort": "output",
+        "inPort": "input"
+      }
+    },
+    {
+      "v": "number_to_string_10",
+      "w": "stdout_9",
+      "value": {
+        "outPort": "output",
+        "inPort": "input"
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7:const(1)_6_copy_3",
+      "w": "fac_11:fac_tr_7:<_5_copy_2",
+      "name": "fac_11:fac_tr_7:const(1)_6_copy_3@output_to_fac_11:fac_tr_7:<_5_copy_2@isLess",
+      "value": {
+        "outPort": "output",
+        "inPort": "isLess"
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7:<_5_copy_1:impl",
+      "w": "fac_11:fac_tr_7:<_5_copy_2",
+      "name": "fac_11:fac_tr_7:<_5_copy_1:impl@n_to_fac_11:fac_tr_7:<_5_copy_2@than",
+      "value": {
+        "outPort": "n",
+        "inPort": "than"
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7:<_5_copy_2",
+      "w": "fac_11:fac_tr_7:<_5_copy_1:impl",
+      "name": "fac_11:fac_tr_7:<_5_copy_2@value_to_fac_11:fac_tr_7:<_5_copy_1:impl@value",
+      "value": {
+        "outPort": "value",
+        "inPort": "value"
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7_copy_4:impl",
+      "w": "fac_11:fac_tr_7_copy_4:impl",
+      "name": "fac_11:fac_tr_7_copy_4:impl@acc_to_fac_11:fac_tr_7_copy_4:impl@acc_out",
+      "value": {
+        "outPort": "acc",
+        "inPort": "acc_new"
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7_copy_4:impl",
+      "w": "fac_11:fac_tr_7_copy_4:impl",
+      "name": "fac_11:fac_tr_7_copy_4:impl@n_to_fac_11:fac_tr_7_copy_4:impl@n_new",
+      "value": {
+        "outPort": "n",
+        "inPort": "n_new"
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7:-_2_copy_5:impl",
+      "w": "fac_11:fac_tr_7:-_2_copy_6",
+      "name": "fac_11:fac_tr_7:-_2_copy_5:impl@n_to_fac_11:fac_tr_7:-_2_copy_6@minuend",
+      "value": {
+        "outPort": "n",
+        "inPort": "minuend"
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7:const(1)_3_copy_7",
+      "w": "fac_11:fac_tr_7:-_2_copy_6",
+      "name": "fac_11:fac_tr_7:const(1)_3_copy_7@output_to_fac_11:fac_tr_7:-_2_copy_6@subtrahend",
+      "value": {
+        "outPort": "output",
+        "inPort": "subtrahend"
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7:-_2_copy_6",
+      "w": "fac_11:fac_tr_7:-_2_copy_5:impl",
+      "name": "fac_11:fac_tr_7:-_2_copy_6@difference_to_fac_11:fac_tr_7:-_2_copy_5:impl@difference",
+      "value": {
+        "outPort": "difference",
+        "inPort": "difference"
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7:-_2_copy_5:impl",
+      "w": "fac_11:fac_tr_7:*_4_copy_9",
+      "name": "fac_11:fac_tr_7:-_2_copy_5:impl@acc_to_fac_11:fac_tr_7:*_4_copy_9@m1",
+      "value": {
+        "outPort": "acc",
+        "inPort": "m1"
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7:-_2_copy_5:impl",
+      "w": "fac_11:fac_tr_7:*_4_copy_9",
+      "name": "fac_11:fac_tr_7:-_2_copy_5:impl@n_to_fac_11:fac_tr_7:*_4_copy_9@m2",
+      "value": {
+        "outPort": "n",
+        "inPort": "m2"
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7:*_4_copy_9",
+      "w": "fac_11:fac_tr_7:-_2_copy_5:impl",
+      "name": "fac_11:fac_tr_7:*_4_copy_9@product_to_fac_11:fac_tr_7:-_2_copy_5:impl@product",
+      "value": {
+        "outPort": "product",
+        "inPort": "product"
+      }
+    },
+    {
+      "v": "string_to_number_12",
+      "w": "fac_11:fac_tr_7_tailrec",
+      "name": "string_to_number_12@output_to_fac_11:fac_tr_7_tailrec@initial_n",
+      "value": {
+        "outPort": "output",
+        "inPort": "initial_n"
+      }
+    },
+    {
+      "v": "fac_11:const(1)_8",
+      "w": "fac_11:fac_tr_7_tailrec",
+      "name": "fac_11:const(1)_8@output_to_fac_11:fac_tr_7_tailrec@initial_acc",
+      "value": {
+        "outPort": "output",
+        "inPort": "initial_acc"
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7_tailrec",
+      "w": "number_to_string_10",
+      "name": "fac_11:fac_tr_7_tailrec@value_to_number_to_string_10@input",
+      "value": {
+        "outPort": "value",
+        "inPort": "input"
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7:<_5_copy_1",
+      "w": "fac_11:fac_tr_7_tailrec",
+      "name": "fac_11:fac_tr_7:<_5_copy_1@fn_to_fac_11:fac_tr_7_tailrec@p_0",
+      "value": {
+        "outPort": "fn",
+        "inPort": "p_0"
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7_copy_4",
+      "w": "fac_11:fac_tr_7_tailrec",
+      "name": "fac_11:fac_tr_7_copy_4@fn_to_fac_11:fac_tr_7_tailrec@f_1",
+      "value": {
+        "outPort": "fn",
+        "inPort": "f_1"
+      }
+    },
+    {
+      "v": "fac_11:fac_tr_7:-_2_copy_5",
+      "w": "fac_11:fac_tr_7_tailrec",
+      "name": "fac_11:fac_tr_7:-_2_copy_5@fn_to_fac_11:fac_tr_7_tailrec@f_0",
+      "value": {
+        "outPort": "fn",
+        "inPort": "f_0"
+      }
+    }
+  ]
+}

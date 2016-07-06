@@ -5,6 +5,7 @@ import graphlib from 'graphlib'
 import fs from 'fs'
 import 'babel-register'
 import * as lambda from '../src/lambda'
+import _ from 'lodash'
 
 var expect = chai.expect
 
@@ -44,6 +45,17 @@ describe('Lambda functions', () => {
   it('`resolveLambdaTypes` finds function types for each apply call', () => {
     var resolvedGraph = lambda.resolveLambdaTypes(aGraph)
     expect(resolvedGraph).to.be.ok
+  })
+
+  it.only('can determine the type of a lambda function', () => {
+    var graph = readFixture('tailrecs.json')
+    const lambdaType1 = lambda.getLambdaFunctionType(graph, 'fac_11:fac_tr_7:<_5_copy_1')
+    expect(_.keys(lambdaType1.arguments)).to.have.length(2)
+    expect(_.keys(lambdaType1.outputs)).to.have.length(1)
+
+    const lambdaType2 = lambda.getLambdaFunctionType(graph, 'fac_11:fac_tr_7:-_2_copy_5')
+    expect(_.keys(lambdaType2.arguments)).to.have.length(2)
+    expect(_.keys(lambdaType2.outputs)).to.have.length(2)
   })
 })
 
