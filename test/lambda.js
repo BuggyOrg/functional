@@ -47,7 +47,7 @@ describe('Lambda functions', () => {
     expect(resolvedGraph).to.be.ok
   })
 
-  it.only('can determine the type of a lambda function', () => {
+  it('can determine the type of a lambda function', () => {
     var graph = readFixture('tailrecs.json')
     const lambdaType1 = lambda.getLambdaFunctionType(graph, 'fac_11:fac_tr_7:<_5_copy_1')
     expect(_.keys(lambdaType1.arguments)).to.have.length(2)
@@ -56,6 +56,13 @@ describe('Lambda functions', () => {
     const lambdaType2 = lambda.getLambdaFunctionType(graph, 'fac_11:fac_tr_7:-_2_copy_5')
     expect(_.keys(lambdaType2.arguments)).to.have.length(2)
     expect(_.keys(lambdaType2.outputs)).to.have.length(2)
+  })
+
+  it('processes map correctly', () => {
+    var map = readFixture('map_fold.json')
+    expect(_.keys(map.node('map2_15:lambda_9:lambda_9_impl:apply_11').outputPorts)).to.have.length(1)
+    const resolved = lambda.resolveLambdaTypes(map)
+    expect(_.keys(resolved.node('map2_15:lambda_9:lambda_9_impl:apply_11').outputPorts)).to.have.length(1)
   })
 })
 

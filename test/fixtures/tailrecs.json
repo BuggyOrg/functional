@@ -148,7 +148,8 @@
           "fn": {
             "type": "function",
             "arguments": {
-              "n": "int64"
+              "n": "int64",
+              "acc": "int64"
             },
             "argumentOrdering": [
               "n",
@@ -277,7 +278,8 @@
           "fn": {
             "type": "function",
             "arguments": {
-              "acc": "int64"
+              "acc": "int64",
+              "n": "int64"
             },
             "argumentOrdering": [
               "acc",
@@ -286,7 +288,8 @@
               "n_new"
             ],
             "outputs": {
-              "acc_out": "int64"
+              "acc_out": "int64",
+              "n_new": "int64"
             },
             "return": "int64"
           }
@@ -331,7 +334,8 @@
           "fn": {
             "type": "function",
             "arguments": {
-              "n": "int64"
+              "n": "int64",
+              "acc": "int64"
             },
             "argumentOrdering": [
               "n",
@@ -340,7 +344,8 @@
               "product"
             ],
             "outputs": {
-              "difference": "int64"
+              "difference": "int64",
+              "product": "int64"
             },
             "return": "int64"
           }
@@ -516,7 +521,8 @@
           "p_0": {
             "type": "function",
             "arguments": {
-              "n": "int64"
+              "n": "int64",
+              "acc": "int64"
             },
             "argumentOrdering": [
               "n",
@@ -531,7 +537,8 @@
           "f_0": {
             "type": "function",
             "arguments": {
-              "n": "int64"
+              "n": "int64",
+              "acc": "int64"
             },
             "argumentOrdering": [
               "n",
@@ -540,14 +547,16 @@
               "product"
             ],
             "outputs": {
-              "difference": "int64"
+              "difference": "int64",
+              "product": "int64"
             },
             "return": "int64"
           },
           "f_1": {
             "type": "function",
             "arguments": {
-              "acc": "int64"
+              "acc": "int64",
+              "n": "int64"
             },
             "argumentOrdering": [
               "acc",
@@ -556,7 +565,8 @@
               "n_new"
             ],
             "outputs": {
-              "acc_out": "int64"
+              "acc_out": "int64",
+              "n_new": "int64"
             },
             "return": "int64"
           },

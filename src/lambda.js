@@ -268,9 +268,9 @@ function propagateFunctions (graph) {
     var vPort = utils.portType(gr, e.v, e.value.outPort)
     var wPort = utils.portType(gr, e.w, e.value.inPort)
     if ((vPort === 'generic' || vPort === 'function') && isFunctionType(wPort)) {
-      return {node: e.v, port: e.value.outPort, portType: 'outputPorts', type: wPort}
+      return {node: e.v, port: e.value.outPort, portType: utils.portDirectionType(gr, e.v, e.value.outPort), type: wPort}
     } else if (isFunctionType(vPort) && (wPort === 'function' || wPort === 'generic')) {
-      return {node: e.w, port: e.value.inPort, portType: 'inputPorts', type: vPort}
+      return {node: e.w, port: e.value.inPort, portType: utils.portDirectionType(gr, e.w, e.value.inPort), type: vPort}
     }
   })), 'node')
   return _.merge({}, graph,
